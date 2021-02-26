@@ -3,17 +3,27 @@ package com.example.kidsdrawingapp
 import android.app.Dialog
 import android.os.Bundle
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.view.get
 
 class MainActivity : AppCompatActivity() {
+    private var selectedBrushColorBtn: ImageButton? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         val dravingView = findViewById<DrawingView>(R.id.drawing_view)
         dravingView.setSizeForBrush(20.toFloat())
 
         val brushBtn = findViewById<ImageButton>(R.id.ib_brush)
         brushBtn.setOnClickListener { showBrushSizeDialog() }
+
+        selectedBrushColorBtn = findViewById<LinearLayout>(R.id.ll_paint_colors)[1] as ImageButton
+        selectedBrushColorBtn?.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.pallet_pressed)
+        )
     }
 
     private fun showBrushSizeDialog() {
