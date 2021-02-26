@@ -2,6 +2,7 @@ package com.example.kidsdrawingapp
 
 import android.app.Dialog
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
@@ -45,5 +46,15 @@ class MainActivity : AppCompatActivity() {
         val drawingView = findViewById<DrawingView>(R.id.drawing_view)
         drawingView.setSizeForBrush(size)
         dialog.dismiss()
+    }
+
+    fun colorButtonClicked(view: View) {
+        if (view !== selectedBrushColorBtn) {
+            selectedBrushColorBtn?.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.pallet_normal))
+            selectedBrushColorBtn = view as ImageButton
+            val drawingView = findViewById<DrawingView>(R.id.drawing_view)
+            drawingView.setColor(selectedBrushColorBtn?.tag.toString())
+            selectedBrushColorBtn?.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.pallet_pressed))
+        }
     }
 }
