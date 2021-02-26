@@ -2,19 +2,18 @@ package com.example.kidsdrawingapp
 
 import android.app.Dialog
 import android.os.Bundle
-import android.view.View
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.get
+import dev.sasikanth.colorsheet.ColorSheet
 
 class MainActivity : AppCompatActivity() {
-    private var selectedBrushColorBtn: ImageButton? = null
+    private var selectedColor: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        selectedColor = ContextCompat.getColor(this, R.color.black)
 
         val dravingView = findViewById<DrawingView>(R.id.drawing_view)
         dravingView.setSizeForBrush(20.toFloat())
@@ -22,9 +21,8 @@ class MainActivity : AppCompatActivity() {
         val brushBtn = findViewById<ImageButton>(R.id.ib_brush)
         brushBtn.setOnClickListener { showBrushSizeDialog() }
 
-        selectedBrushColorBtn = findViewById<LinearLayout>(R.id.ll_paint_colors)[1] as ImageButton
-        selectedBrushColorBtn?.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.pallet_pressed)
-        )
+        val colorPickerBtn = findViewById<ImageButton>(R.id.ib_color)
+        colorPickerBtn.setOnClickListener { showColorPickerDialog() }
     }
 
     private fun showBrushSizeDialog() {
@@ -48,13 +46,35 @@ class MainActivity : AppCompatActivity() {
         dialog.dismiss()
     }
 
-    fun colorButtonClicked(view: View) {
-        if (view !== selectedBrushColorBtn) {
-            selectedBrushColorBtn?.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.pallet_normal))
-            selectedBrushColorBtn = view as ImageButton
-            val drawingView = findViewById<DrawingView>(R.id.drawing_view)
-            drawingView.setColor(selectedBrushColorBtn?.tag.toString())
-            selectedBrushColorBtn?.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.pallet_pressed))
-        }
+    private fun showColorPickerDialog() {
+        val colors = getSupportedColors();
+        ColorSheet().colorPicker(
+            colors = colors,
+            listener = { color -> setUpPickedUpColor(color)},
+            selectedColor = selectedColor
+        ).show(supportFragmentManager)
+    }
+
+    private fun getSupportedColors(): IntArray {
+        return intArrayOf(
+            getColorIdFromResource(R.color.beige),
+            getColorIdFromResource(R.color.black),
+            getColorIdFromResource(R.color.red),
+            getColorIdFromResource(R.color.green),
+            getColorIdFromResource(R.color.blue),
+            getColorIdFromResource(R.color.teal_700),
+            getColorIdFromResource(R.color.purple_500),
+            getColorIdFromResource(R.color.yellow)
+        )
+    }
+
+    private fun getColorIdFromResource(colorResource: Int): Int {
+        return ContextCompat.getColor(this, colorResource)
+    }
+
+    private fun setUpPickedUpColor(color: Int) {
+        selectedColor = color
+        val drawingView = findViewById<DrawingView>(R.id.drawing_view)
+        drawingView.setColor(color)
     }
 }

@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.ContextCompat
 
 class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var mDrawPath: CustomPath? = null
@@ -36,8 +37,8 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         mDrawPaint?.strokeWidth = mBrushSize
     }
 
-    fun setColor(newColor: String) {
-        this.color = Color.parseColor(newColor)
+    fun setColor(newColor: Int) {
+        this.color = newColor
         mDrawPaint?.color = color
     }
 
