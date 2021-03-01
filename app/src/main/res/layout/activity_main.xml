@@ -77,6 +77,14 @@
             android:scaleType="fitXY"
             android:src="@drawable/ic_undo"/>
 
+        <ImageButton
+            android:id="@+id/ib_save"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="5dp"
+            android:contentDescription="Save image"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_save"/>
     </LinearLayout>
 
 
