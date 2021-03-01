@@ -1,9 +1,18 @@
 package com.example.kidsdrawingapp
 
+import android.Manifest
+import android.app.Activity
 import android.app.Dialog
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.MediaStore
+import android.view.View
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import dev.sasikanth.colorsheet.ColorSheet
 
@@ -23,6 +32,15 @@ class MainActivity : AppCompatActivity() {
 
         val colorPickerBtn = findViewById<ImageButton>(R.id.ib_color)
         colorPickerBtn.setOnClickListener { showColorPickerDialog() }
+
+        val galleryBtn = findViewById<ImageButton>(R.id.ib_image)
+        galleryBtn.setOnClickListener {
+            if(isReadStorageAllowed()) {
+                pickupPhotoFromGallery()
+            } else {
+                requestStoragePermission()
+            }
+        }
     }
 
     private fun showBrushSizeDialog() {
@@ -76,5 +94,61 @@ class MainActivity : AppCompatActivity() {
         selectedColor = color
         val drawingView = findViewById<DrawingView>(R.id.drawing_view)
         drawingView.setColor(color)
+    }
+
+    private fun requestStoragePermission() {
+        if(shouldAskForExternalStoragePermission()) {
+            Toast.makeText(this, "Need permission to add a background", Toast.LENGTH_SHORT).show()
+        }
+        ActivityCompat.requestPermissions(this,
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+            STORAGE_PERMISSION_CODE)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == STORAGE_PERMISSION_CODE) {
+            if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission granted now you can read the storage", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Oops you just denied the permission", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun isReadStorageAllowed(): Boolean {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun shouldAskForExternalStoragePermission(): Boolean{
+        return ActivityCompat.shouldShowRequestPermissionRationale(this,
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE).toString())
+    }
+
+    companion object{
+        private const val STORAGE_PERMISSION_CODE = 1
+        private const val GALLERY = 2
+    }
+
+    private fun pickupPhotoFromGallery() {
+        val pickPhotoIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(pickPhotoIntent, GALLERY)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && requestCode == GALLERY) {
+            try {
+                if(data?.data != null) {
+                    val imageBackground = findViewById<ImageView>(R.id.iv_background)
+                    imageBackground.visibility = View.VISIBLE
+                    imageBackground.setImageURI(data.data)
+                } else {
+                    Toast.makeText(this, "Error in parsing the image or its corrupted.", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }
