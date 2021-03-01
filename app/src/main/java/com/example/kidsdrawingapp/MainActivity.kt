@@ -8,9 +8,11 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.os.AsyncTask
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
@@ -18,6 +20,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import dev.sasikanth.colorsheet.ColorSheet
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity() {
     private var selectedColor: Int? = null
@@ -43,6 +48,16 @@ class MainActivity : AppCompatActivity() {
         galleryBtn.setOnClickListener {
             if(isReadStorageAllowed()) {
                 pickupPhotoFromGallery()
+            } else {
+                requestStoragePermission()
+            }
+        }
+
+        val saveBtn = findViewById<ImageButton>(R.id.ib_save)
+        saveBtn.setOnClickListener {
+            if(isReadStorageAllowed()) {
+                val frameLayout = findViewById<FrameLayout>(R.id.fk_drawing_view_container)
+                BitmapAsyncTask(getBitmapFromView(frameLayout)).execute()
             } else {
                 requestStoragePermission()
             }
@@ -139,6 +154,33 @@ class MainActivity : AppCompatActivity() {
     private fun pickupPhotoFromGallery() {
         val pickPhotoIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(pickPhotoIntent, GALLERY)
+    }
+
+    private inner class BitmapAsyncTask(val mBitmap: Bitmap): AsyncTask<Any, Void, String>() {
+        override fun doInBackground(vararg params: Any?): String {
+            var result = ""
+            if(mBitmap != null) {
+                try{
+                    val bytes = ByteArrayOutputStream()
+                    mBitmap.compress(Bitmap.CompressFormat.PNG, 90, bytes)
+                    val bitmapFile = File(getFilename())
+                    val fileOutputStream = FileOutputStream(bitmapFile)
+                    fileOutputStream.write(bytes.toByteArray())
+                    fileOutputStream.close()
+                    result = bitmapFile.absolutePath
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            return result
+        }
+    }
+
+    private fun getFilename(): String{
+        return externalCacheDir?.absoluteFile.toString() +
+                File.separator + "KidDrawingApp_" +
+                System.currentTimeMillis() / 1000 +
+                ".png"
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
