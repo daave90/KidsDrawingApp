@@ -33,6 +33,9 @@ class MainActivity : AppCompatActivity() {
         val colorPickerBtn = findViewById<ImageButton>(R.id.ib_color)
         colorPickerBtn.setOnClickListener { showColorPickerDialog() }
 
+        val undoBtn = findViewById<ImageButton>(R.id.ib_undo)
+        undoBtn.setOnClickListener { dravingView.undo() }
+
         val galleryBtn = findViewById<ImageButton>(R.id.ib_image)
         galleryBtn.setOnClickListener {
             if(isReadStorageAllowed()) {
